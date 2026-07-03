@@ -3,8 +3,8 @@ FUEL_PRICE_PER_LITRE = 1100
 
 #vehicle type for delivery
 VEHICLE_CONSUMPTION = {
-    "motorcycle": {"normal": 35, "heavy":25},
-    "van":{"normal":10, "heavy":7}
+    "motorcycle": {"low": 35 , "moderate": 28, "heavy":25},
+    "van":{"low":10,"moderate": 8, "heavy":7}
 }
 
 #Transportaion fare parameters
