@@ -4,3 +4,4 @@ __pycache__/
 data/raw/
 *.csv
 *.pdf
+service_account.json
