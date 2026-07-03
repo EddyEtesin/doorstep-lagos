@@ -1,15 +1,21 @@
+# Defines the fuel_price
 FUEL_PRICE_PER_LITRE = 1100
 
+#vehicle type for delivery
 VEHICLE_CONSUMPTION = {
     "motorcycle": {"normal": 35, "heavy":25},
     "van":{"normal":10, "heavy":7}
 }
+
+#Transportaion fare parameters
 BASE_FARE = 600
 RATE_PER_KM = 250
 ISLAND_SURCHARGE = 300
 
+#Traffic levels 
 TRAFFIC_LEVELS = ["low", "moderate", "heavy"]
 
+#zones in lagos
 ZONES = {
     "island": ["Victoria Island", "Lekki Phase 1", "Lekki Phase 2",
         "Ikoyi", "Eko Atlantic", "Ajah", "Sangotedo", "Badore",
@@ -28,10 +34,14 @@ ZONES = {
         "Alimosho","Egbeda","Idimu","Igba","Igbogbo"]
 }
 
+#quickly list all zones
 ALL_ZONES  = [zone for group in ZONES.values() for zone in group]
 
+
+#island zones
 ISLAND_ZONES = ZONES["island"]
 
+#zone distances in km (origin is ikeja)
 ZONE_DISTANCES = {
     "Victoria Island" : 18, "Lekki Phase 1" :24, "Lekki Phase 2": 30,
     "Ikoyi":16, "Eko Atlantic":20, "Ajah" :35, "Sangotedo" :38, "Badore":36,
