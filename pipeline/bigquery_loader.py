@@ -1,6 +1,7 @@
 import os
 from google.cloud import bigquery
 import tempfile
+import json 
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(
     os.path.dirname(__file__), "..", "service_account.json"
