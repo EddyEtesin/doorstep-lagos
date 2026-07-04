@@ -1,5 +1,6 @@
 import os
 from google.cloud import bigquery
+import tempfile
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(
     os.path.dirname(__file__), "..", "service_account.json"
@@ -42,15 +43,28 @@ def create_table_if_not_exists():
     print(f"Table {table_ref} ready.")
 
 def load_orders(orders):
-    client =get_client()
+    client = get_client()
     table_ref = f"{PROJECT_ID}.{DATASET_ID}.{TABLE_ID}"
 
-    errors = client.insert_rows_json(table_ref, orders)
+    # Write orders to a temp newline-delimited JSON file
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        for order in orders:
+            f.write(json.dumps(order) + "\n")
+        temp_path = f.name
 
-    if errors:
-        print(f"Errors inserting rows: {errors}")
-    else:
-        print(f"{len(orders)} orders inserted into BigQuery.")
+    job_config = bigquery.LoadJobConfig(
+        source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
+        write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
+        autodetect=False,
+    )
+
+    with open(temp_path, "rb") as f:
+        job = client.load_table_from_file(f, table_ref, job_config=job_config)
+
+    job.result()  # Wait for the job to complete
+
+    print(f"{len(orders)} orders loaded into BigQuery.")
+
 
 if __name__ == "__main__":
     create_table_if_not_exists()
