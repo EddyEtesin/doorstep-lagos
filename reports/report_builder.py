@@ -81,18 +81,23 @@ def build_report(target_date=None):
 
     # 1. Best and worst driver
     driver_delivered = {}
-    driver_failed = {}
     for r in rows:
         d = r["driver"]
         if r["status"] == "delivered":
             driver_delivered[d] = driver_delivered.get(d, 0) + 1
-        if r["status"] == "failed":
-            driver_failed[d] = driver_failed.get(d, 0) + 1
 
-    best_driver = max(driver_delivered, key=driver_delivered.get) if driver_delivered else "N/A"
-    best_driver_count = driver_delivered.get(best_driver, 0)
-    worst_driver = max(driver_failed, key=driver_failed.get) if driver_failed else "N/A"
-    worst_driver_count = driver_failed.get(worst_driver, 0)
+    if driver_delivered:
+        max_deliveries = max(driver_delivered.values())
+        top_drivers = [d for d, count in driver_delivered.items() if count == max_deliveries]
+        second_max = sorted(set(driver_delivered.values()))[-2] if len(set(driver_delivered.values())) > 1 else 0
+
+        if len(top_drivers) == 1 and max_deliveries > second_max:
+            best_driver = top_drivers[0]
+            best_driver_count = max_deliveries
+        else:
+            best_driver = None
+    else:
+        best_driver = None
 
     # 2. Average delivery time
     avg_eta = round(sum(r["eta_minutes"] for r in rows if r["eta_minutes"] is not None) / total_orders)
@@ -140,18 +145,20 @@ def build_report(target_date=None):
 
     elements = []
 
-    title_style = ParagraphStyle("title", fontSize=20, textColor=colors.black,
-                                  fontName="Helvetica-Bold", spaceAfter=20)
-    date_style = ParagraphStyle("date", fontSize=10, textColor=MID_GRAY,
-                                 fontName="Helvetica", spaceBefore=6, spaceAfter=16)
-    section_style = ParagraphStyle("section", fontSize=12, textColor=colors.black,
-                                    fontName="Helvetica-Bold", spaceBefore=16, spaceAfter=6)
-    body_style = ParagraphStyle("body", fontSize=10, textColor=colors.black,
-                                 fontName="Helvetica", leading=16, spaceAfter=6)
-    bullet_style = ParagraphStyle("bullet", fontSize=10, textColor=colors.black,
-                                   fontName="Helvetica", leading=16,
-                                   leftIndent=16, spaceAfter=3)
-    footer_style = ParagraphStyle("footer", fontSize=8, textColor=MID_GRAY,
+    title_style = ParagraphStyle("title", fontSize=30, textColor=colors.black,
+                                  fontName="Helvetica-Bold", spaceAfter=25)
+    date_style = ParagraphStyle("date", fontSize=15, textColor=MID_GRAY,
+                                 fontName="Helvetica", spaceBefore=8, spaceAfter=20)
+    section_style = ParagraphStyle("section", fontSize=20, textColor=colors.black,
+                                fontName="Helvetica-Bold", spaceBefore=22, spaceAfter=14)
+
+    body_style = ParagraphStyle("body", fontSize=15, textColor=colors.black,
+                             fontName="Helvetica", leading=20, spaceAfter=10)
+
+    bullet_style = ParagraphStyle("bullet", fontSize=15, textColor=colors.black,
+                               fontName="Helvetica", leading=20,
+                               leftIndent=18, spaceAfter=7)
+    footer_style = ParagraphStyle("footer", fontSize=12, textColor=MID_GRAY,
                                    alignment=TA_CENTER)
 
     def bullet(text):
@@ -163,7 +170,7 @@ def build_report(target_date=None):
         f"Daily Operations Report — {target_date.strftime('%A, %d %B %Y')}",
         date_style
     ))
-    elements.append(HRFlowable(width="100%", thickness=1, color=colors.black, spaceAfter=16))
+    elements.append(HRFlowable(width="100%", thickness=1, color=colors.black, spaceAfter=12))
 
     # 1. Operations Overview
     elements.append(Paragraph("Operations Overview", section_style))
@@ -171,12 +178,13 @@ def build_report(target_date=None):
         f"Today, Doorstep Lagos dispatched <b>{total_orders} orders</b> across Lagos. "
         f"Of these, <b>{delivered} were successfully delivered</b>, {failed} failed, "
         f"and {pending} are still pending. This gives an overall delivery success rate of "
-        f"<b>{delivery_rate}%</b> for the day.",
+        f"<b>{delivery_rate}%</b> for the day. Also, Average delivery time across all orders: {avg_eta} minutes.",
         body_style
     ))
-    elements.append(bullet(f"Best performing driver: {best_driver} — {best_driver_count} successful deliveries"))
-    elements.append(bullet(f"Most failed deliveries: {worst_driver} — {worst_driver_count} failures"))
-    elements.append(bullet(f"Average delivery time across all orders: {avg_eta} minutes"))
+    if best_driver:
+        delivery_word = "delivery" if best_driver_count == 1 else "deliveries"
+        elements.append(bullet(f"Driver with the most deliveries: {best_driver} — with {best_driver_count}\u00a0successful\u00a0{delivery_word}"))
+    
 
     # 2. Financial Summary
     elements.append(Paragraph("Financial Summary", section_style))
@@ -237,11 +245,11 @@ def build_report(target_date=None):
     elements.append(bullet("Next operations day: tomorrow."))
 
     # Footer
-    elements.append(Spacer(1, 1*cm))
+    elements.append(Spacer(1, 0.8*cm))
     elements.append(HRFlowable(width="100%", thickness=0.5, color=MID_GRAY, spaceAfter=6))
     elements.append(Paragraph(
-        f"Generated automatically by Doorstep Lagos Pipeline — {date.today().strftime('%d %B %Y')}",
-        footer_style
+    f"Generated automatically by Doorstep Lagos Pipeline — {date.today().strftime('%d %B %Y')}",
+    footer_style
     ))
 
     doc.build(elements)
