@@ -2,6 +2,9 @@
 import os
 import sys
 from datetime import date
+from datetime import datetime
+import pytz 
+import time
 
 from pipeline.generate_orders import generate_orders
 from pipeline.bigquery_loader import create_table_if_not_exists, load_orders
@@ -44,6 +47,17 @@ def run_evening(target_date=None):
     print(f"[EVENING] Report emailed successfully.")
 
 
+def wait_until(hour, minute=0):
+    """Wait until exact WAT time before executing."""
+    wat = pytz.timezone("Africa/Lagos")
+    now = datetime.now(wat)
+    target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    wait_seconds = (target - now).total_seconds()
+    if wait_seconds > 0:
+        print(f"Waiting {round(wait_seconds/60)} minutes until {hour:02d}:{minute:02d} WAT...")
+        time.sleep(wait_seconds)
+
+
 if __name__ == "__main__":
     import argparse
 
@@ -51,11 +65,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "job",
         choices=["morning", "evening"],
-        help="Which job to run: morning (order generation) or evening (report + email)"
+        help="morning or evening"
     )
     args = parser.parse_args()
 
     if args.job == "morning":
+        wait_until(9, 0) # waits until 9am before executing 
         run_morning()
     elif args.job == "evening":
-        run_evening(target_date=date(2026,7,4))
+        wait_until(18, 0) # waits until 6pm before executing 
+        run_evening()

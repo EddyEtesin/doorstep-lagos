@@ -1,0 +1,29 @@
+name: Evening Job — Report and Email
+
+on:
+  schedule:
+    - cron: '30 16 * * 1-6'  # 5:30 PM WAT (Mon-Sat), gives 30min buffer
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run evening job
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          MANAGER_EMAIL: ${{ secrets.MANAGER_EMAIL }}
+        run: python main.py evening
+        

@@ -11,10 +11,16 @@ from reportlab.lib.units import cm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(
-    os.path.dirname(__file__), "..", "service_account.json"
-)
-
+gcp_creds = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")
+if gcp_creds:
+    import tempfile
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        f.write(gcp_creds)
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = f.name
+else:
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(
+        os.path.dirname(__file__), "..", "service_account.json"
+    )
 PROJECT_ID = "doorstep-lagos"
 DATASET_ID = "doorstep_lagos"
 TABLE_ID = "orders"
