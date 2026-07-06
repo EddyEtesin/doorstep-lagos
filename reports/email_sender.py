@@ -47,7 +47,8 @@ Doorstep Lagos Pipeline
             f"attachment; filename=doorstep_lagos_report_{target_date}.pdf"
         )
         msg.attach(attachment)
- # Send
+
+ # the part that sends the email
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
         server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
         server.sendmail(GMAIL_ADDRESS, MANAGER_EMAIL, msg.as_string())
@@ -56,9 +57,7 @@ Doorstep Lagos Pipeline
 
 
 if __name__ == "__main__":
-    from datetime import date
     from reports.report_builder import build_report
-    test_date = date(2026, 6, 29)  # yesterday
-    pdf_path = build_report(target_date=test_date)
+    pdf_path = build_report()
     if pdf_path:
-        send_report(pdf_path, target_date=test_date)
+        send_report(pdf_path)
