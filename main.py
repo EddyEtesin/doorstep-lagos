@@ -73,5 +73,5 @@ if __name__ == "__main__":
         wait_until(9, 0) # waits until 9am before executing 
         run_morning()
     elif args.job == "evening":
-        # wait_until(18, 0) # waits until 6pm before executing 
+        wait_until(18, 0) # waits until 6pm before executing 
         run_evening()
